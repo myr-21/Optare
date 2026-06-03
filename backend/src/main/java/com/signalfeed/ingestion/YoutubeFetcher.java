@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpStatusCodeException;
+import jakarta.annotation.PostConstruct;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -36,6 +38,15 @@ public class YoutubeFetcher implements ContentFetcher {
 
     public YoutubeFetcher(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            log.warn("YouTube Ingestion is DISABLED: API Key is missing. Configure 'YOUTUBE_API_KEY' in environment variables.");
+        } else {
+            log.info("YouTube Ingestion is ENABLED with a configured API key.");
+        }
     }
 
     @Override
@@ -165,7 +176,11 @@ public class YoutubeFetcher implements ContentFetcher {
                 }
             }
 
+            log.info("Successfully fetched and processed {} YouTube videos for topic: {}", items.size(), topic);
             return items;
+        } catch (HttpStatusCodeException e) {
+            log.error("YouTube API HTTP error during execution: Status Code: {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return Collections.emptyList();
         } catch (Exception e) {
             log.warn("YouTube Fetcher failed during execution: {}", e.getMessage());
             return Collections.emptyList();
