@@ -1,10 +1,12 @@
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8081/api";
 
 export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
   return localStorage.getItem("token");
 }
 
 export function getStoredUser(): any | null {
+  if (typeof window === "undefined") return null;
   const userJson = localStorage.getItem("user");
   if (!userJson) return null;
   try {
@@ -220,4 +222,21 @@ export async function getMe(): Promise<any> {
     throw new Error("Failed to load profile details");
   }
   return await res.json();
+}
+
+export function getConnectedPlatforms(): Record<string, boolean> {
+  if (typeof window === "undefined") return { youtube: true, article: true, hackernews: true, devto: true };
+  const stored = localStorage.getItem("connected_platforms");
+  if (!stored) return { youtube: true, article: true, hackernews: true, devto: true };
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    return { youtube: true, article: true, hackernews: true, devto: true };
+  }
+}
+
+export function saveConnectedPlatforms(platforms: Record<string, boolean>) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("connected_platforms", JSON.stringify(platforms));
+  }
 }

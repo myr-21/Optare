@@ -1,4 +1,4 @@
-import { Bookmark, ThumbsUp, ThumbsDown, ExternalLink, Sparkles, TrendingUp, Play } from "lucide-react";
+import { Bookmark, ThumbsUp, ThumbsDown, ExternalLink, Target, TrendingUp, Play, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { type Recommendation, sourceMeta, type SourceType } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -47,21 +47,12 @@ export function RecCard({ rec }: { rec: any }) {
 
   const displayWhy = rec.whyRecommended || (Array.isArray(rec.reasons) && rec.reasons.length > 0 ? rec.reasons.join(" · ") : "");
 
-  const isGradient = rec.thumbnail?.startsWith("linear-gradient");
-  const gradients = [
-    "linear-gradient(135deg, oklch(0.5 0.18 145), oklch(0.3 0.12 200))",
-    "linear-gradient(135deg, oklch(0.55 0.2 25), oklch(0.35 0.15 320))",
-    "linear-gradient(135deg, oklch(0.5 0.2 260), oklch(0.4 0.15 180))",
-    "linear-gradient(135deg, oklch(0.6 0.18 70), oklch(0.4 0.15 15))",
-    "linear-gradient(135deg, oklch(0.5 0.2 300), oklch(0.35 0.15 200))",
-    "linear-gradient(135deg, oklch(0.55 0.18 180), oklch(0.35 0.15 260))",
-  ];
+  const isHN = sourceLower === "hackernews";
+  const hasThumbnail = !isHN && !!(rec.thumbnail && !rec.thumbnail.startsWith("linear-gradient") && rec.thumbnail.trim() !== "");
   
-  const backgroundStyle = isGradient 
-    ? { background: rec.thumbnail }
-    : rec.thumbnail 
-      ? { backgroundImage: `url(${rec.thumbnail})`, backgroundSize: "cover", backgroundPosition: "center" }
-      : { background: gradients[Math.abs(hashString(rec.id || "")) % gradients.length] };
+  const backgroundStyle = hasThumbnail 
+    ? { backgroundImage: `url(${rec.thumbnail})`, backgroundSize: "cover", backgroundPosition: "center" }
+    : undefined;
 
   const handleThumbsUp = async () => {
     try {
@@ -112,36 +103,59 @@ export function RecCard({ rec }: { rec: any }) {
   };
 
   return (
-    <article className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-border/80 hover:shadow-2xl hover:shadow-black/20 transition-all duration-300 flex flex-col">
+    <article 
+      className={cn(
+        "group relative bg-card border border-border/80 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/40 hover:bg-surface/30 hover:-translate-y-[1.5px] transition-all duration-200 flex flex-col",
+        isHN && "border-l-4 border-l-[#ff6600]"
+      )}
+    >
       {/* Thumbnail */}
-      <div
-        className="relative aspect-[16/9] overflow-hidden"
-        style={backgroundStyle}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        {rec.source === "youtube" && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+      {hasThumbnail && (
+        <div
+          className="relative aspect-[16/9] overflow-hidden border-b border-border/40"
+          style={backgroundStyle}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+          {rec.source === "youtube" && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary transition-all duration-200">
+                <Play className="w-4 h-4 text-white fill-white ml-0.5 group-hover:text-primary-foreground group-hover:fill-primary-foreground transition-colors" />
+              </div>
             </div>
+          )}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-md border border-white/10"
+              style={{ backgroundColor: `color-mix(in oklab, ${meta.color} 75%, rgba(0,0,0,0.4))` }}
+            >
+              {meta.label}
+            </span>
           </div>
-        )}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5">
-          <span
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-md"
-            style={{ backgroundColor: `color-mix(in oklab, ${meta.color} 70%, transparent)` }}
-          >
-            {meta.label}
-          </span>
+          <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-black/60 backdrop-blur-md text-white border border-white/15">
+            <TrendingUp className="w-3 h-3 text-primary" />
+            {displayScore}
+          </div>
         </div>
-        <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-black/50 backdrop-blur-md text-white border border-white/10">
-          <TrendingUp className="w-3 h-3 text-primary" />
-          {displayScore}
-        </div>
-      </div>
+      )}
 
       {/* Body */}
       <div className="p-4 flex-1 flex flex-col">
+        {!hasThumbnail && (
+          <div className="flex items-center justify-between mb-3">
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-white"
+              style={{ backgroundColor: isHN ? "#ff6600" : meta.color }}
+            >
+              {isHN && <MessageSquare className="w-3 h-3 shrink-0" />}
+              {meta.label}
+            </span>
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-accent border border-border text-foreground">
+              <TrendingUp className="w-3 h-3 text-primary" />
+              {displayScore}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2">
           <span className="font-medium text-foreground/80">{displaySourceName}</span>
           <span>·</span>
@@ -164,9 +178,9 @@ export function RecCard({ rec }: { rec: any }) {
         </div>
 
         {showWhy && displayWhy && (
-          <div className="mb-3 p-3 rounded-lg bg-primary/5 border border-primary/15 animate-fade-in">
+          <div className="mb-3 p-3 rounded-lg bg-muted/40 border border-border animate-fade-in">
             <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-primary font-semibold mb-1">
-              <Sparkles className="w-3 h-3" /> Why this
+              <Target className="w-3 h-3" /> Relevance Info
             </div>
             <p className="text-xs text-foreground/80">{displayWhy}</p>
           </div>
@@ -201,7 +215,7 @@ export function RecCard({ rec }: { rec: any }) {
               )}
               title="Why this?"
             >
-              <Sparkles className="w-4 h-4" />
+              <Target className="w-4 h-4" />
             </button>
             <button
               onClick={handleBookmark}

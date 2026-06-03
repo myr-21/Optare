@@ -21,14 +21,14 @@ function Collections() {
       <SectionHeader title="All collections" subtitle={`${collections.length} collections · ${collections.reduce((s, c) => s + c.count, 0)} items`} />
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {collections.map((c) => (
-          <div key={c.id} className="bg-card border border-border rounded-xl overflow-hidden hover:border-border/80 hover:shadow-2xl hover:shadow-black/20 transition group cursor-pointer">
-            <div className="h-32 relative" style={{ background: `linear-gradient(135deg, ${c.color}, color-mix(in oklab, ${c.color} 30%, transparent))` }}>
-              <div className="absolute inset-0 grid-bg opacity-20" />
-              <Folder className="absolute right-5 bottom-5 w-10 h-10 text-white/80" />
+          <div key={c.id} className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition group cursor-pointer flex flex-col">
+            <div className="h-32 relative bg-gradient-to-br from-muted to-accent border-b border-border/45">
+              <div className="absolute inset-0 grid-bg opacity-10" />
+              <Folder className="absolute right-5 bottom-5 w-10 h-10 text-muted-foreground/60 group-hover:text-primary transition-colors duration-200" />
             </div>
-            <div className="p-5">
-              <div className="font-display font-semibold text-lg">{c.name}</div>
-              <div className="flex items-center justify-between mt-1">
+            <div className="p-5 flex-1 flex flex-col justify-between">
+              <div className="font-display font-semibold text-lg text-foreground">{c.name}</div>
+              <div className="flex items-center justify-between mt-2">
                 <span className="text-xs text-muted-foreground">{c.count} items</span>
                 <span className="text-xs text-muted-foreground">Updated today</span>
               </div>

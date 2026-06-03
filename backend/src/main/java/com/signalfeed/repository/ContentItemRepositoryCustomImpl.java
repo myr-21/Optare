@@ -92,7 +92,10 @@ public class ContentItemRepositoryCustomImpl implements ContentItemRepositoryCus
 
         // Sorting
         if ("relevance".equalsIgnoreCase(sortBy) && hasQuery) {
-            selectSql.append(" ORDER BY ts_rank(c.search_vector, plainto_tsquery('english', :queryStr)) DESC");
+            selectSql.append(" ORDER BY ");
+            selectSql.append("(CASE WHEN LOWER(c.title) = LOWER(:queryStr) THEN 10.0 ELSE 0.0 END) + ");
+            selectSql.append("(CASE WHEN LOWER(c.title) LIKE LOWER(:likeQuery) THEN 5.0 ELSE 0.0 END) + ");
+            selectSql.append("ts_rank_cd(c.search_vector, plainto_tsquery('english', :queryStr)) DESC");
         } else if ("date".equalsIgnoreCase(sortBy)) {
             selectSql.append(" ORDER BY c.published_date DESC NULLS LAST");
         } else if ("engagement".equalsIgnoreCase(sortBy)) {
@@ -104,6 +107,9 @@ public class ContentItemRepositoryCustomImpl implements ContentItemRepositoryCus
         Query selectQuery = entityManager.createNativeQuery(selectSql.toString());
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             selectQuery.setParameter(entry.getKey(), entry.getValue());
+        }
+        if (hasQuery) {
+            selectQuery.setParameter("likeQuery", "%" + queryStr.trim() + "%");
         }
 
         selectQuery.setFirstResult((int) pageable.getOffset());

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { AuthShell, Field, PrimaryBtn, SocialBtns } from "@/components/auth-shell";
+import { AuthShell, Field, PrimaryBtn } from "@/components/auth-shell";
 import { register } from "@/lib/api";
 import { Loader2, AlertCircle } from "lucide-react";
 
@@ -41,14 +41,10 @@ function Signup() {
   return (
     <AuthShell
       title="Create your account"
-      subtitle="Start aggregating your feed in under a minute."
+      subtitle="Create your Optare account."
       footer={<>Already have one? <Link to="/login" className="text-primary font-medium hover:underline">Log in</Link></>}
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <SocialBtns />
-        <div className="flex items-center gap-3 text-xs text-muted-foreground my-2">
-          <div className="flex-1 h-px bg-border" />or<div className="flex-1 h-px bg-border" />
-        </div>
 
         {error && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-lg flex items-start gap-2 animate-fade-in">

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { AuthShell, Field, PrimaryBtn, SocialBtns } from "@/components/auth-shell";
+import { AuthShell, Field, PrimaryBtn } from "@/components/auth-shell";
 import { login } from "@/lib/api";
 import { Loader2, AlertCircle } from "lucide-react";
 
@@ -35,14 +35,10 @@ function Login() {
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Log in to your SignalFeed account."
+      subtitle="Log in to your Optare account."
       footer={<>Don't have an account? <Link to="/signup" className="text-primary font-medium hover:underline">Sign up</Link></>}
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <SocialBtns />
-        <div className="flex items-center gap-3 text-xs text-muted-foreground my-2">
-          <div className="flex-1 h-px bg-border" />or<div className="flex-1 h-px bg-border" />
-        </div>
 
         {error && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-lg flex items-start gap-2 animate-fade-in">

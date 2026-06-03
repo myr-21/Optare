@@ -242,14 +242,10 @@ export const interestCategories = [
 ];
 
 export const platforms = [
-  { id: "youtube", name: "YouTube", connected: true, desc: "Video content & creators" },
-  { id: "reddit", name: "Reddit", connected: true, desc: "Community discussions" },
-  { id: "news", name: "News", connected: true, desc: "Major publications" },
-  { id: "article", name: "Articles", connected: true, desc: "Medium, Dev.to, blogs" },
-  { id: "github", name: "GitHub", connected: false, desc: "Trending repositories" },
-  { id: "hackernews", name: "Hacker News", connected: false, desc: "Tech community" },
-  { id: "twitter", name: "X / Twitter", connected: false, desc: "Curated lists" },
-  { id: "podcast", name: "Podcasts", connected: false, desc: "Audio content" },
+  { id: "youtube", name: "YouTube", connected: true, desc: "Technical channels & videos" },
+  { id: "article", name: "Articles (RSS)", connected: true, desc: "Wired, TechCrunch, Verge, etc." },
+  { id: "hackernews", name: "Hacker News", connected: true, desc: "Developer discussion feed" },
+  { id: "devto", name: "Dev.to", connected: true, desc: "Developer community articles" }
 ];
 
 export const collections = [

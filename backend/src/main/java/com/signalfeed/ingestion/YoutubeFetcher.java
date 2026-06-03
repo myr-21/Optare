@@ -30,8 +30,16 @@ public class YoutubeFetcher implements ContentFetcher {
     private String apiKey;
 
     private final String[] topics = {
-        "AI", "machine learning", "programming", "cybersecurity",
-        "finance", "startups", "science", "productivity", "gaming", "Java"
+        "artificial intelligence",
+        "machine learning",
+        "software engineering",
+        "programming",
+        "cybersecurity",
+        "cloud computing",
+        "developer tools",
+        "system design",
+        "web development",
+        "data engineering"
     };
 
     private final AtomicInteger topicIndex = new AtomicInteger(0);
@@ -67,10 +75,15 @@ public class YoutubeFetcher implements ContentFetcher {
         log.info("Fetching YouTube content for topic: {} (Category: {})", topic, category);
 
         try {
-            // Step 1: Search for videos
+            // Step 1: Search for videos with quality filters (relevance order, medium/long duration to exclude Shorts)
+            String durationFilter = Math.random() < 0.8 ? "medium" : "long";
             String searchUrl = "https://www.googleapis.com/youtube/v3/search" +
-                    "?part=snippet&type=video&maxResults=50&order=viewCount" +
-                    "&q=" + topic + "&key=" + apiKey;
+                    "?part=snippet&type=video&maxResults=50&order=relevance" +
+                    "&videoDuration=" + durationFilter +
+                    "&q=" + java.net.URLEncoder.encode(topic, java.nio.charset.StandardCharsets.UTF_8) + 
+                    "&key=" + apiKey;
+
+            log.info("YouTube Search Query Stage: URL: {}, Topic: {}, Duration Filter: {}", searchUrl, topic, durationFilter);
 
             Map<String, Object> searchResponse = restTemplate.getForObject(searchUrl, Map.class);
             if (searchResponse == null || !searchResponse.containsKey("items")) {
@@ -177,6 +190,10 @@ public class YoutubeFetcher implements ContentFetcher {
             }
 
             log.info("Successfully fetched and processed {} YouTube videos for topic: {}", items.size(), topic);
+            if (!items.isEmpty()) {
+                log.info("Sample video titles fetched for topic '{}':", topic);
+                items.stream().limit(5).forEach(videoItem -> log.info(" - Title: {}", videoItem.getTitle()));
+            }
             return items;
         } catch (HttpStatusCodeException e) {
             log.error("YouTube API HTTP error during execution: Status Code: {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
@@ -198,14 +215,9 @@ public class YoutubeFetcher implements ContentFetcher {
 
     private String mapTopicToCategory(String topic) {
         return switch (topic) {
-            case "AI", "machine learning" -> "AI";
-            case "programming", "Java" -> "PROGRAMMING";
+            case "artificial intelligence", "machine learning" -> "AI";
+            case "software engineering", "programming", "cloud computing", "developer tools", "system design", "web development", "data engineering" -> "PROGRAMMING";
             case "cybersecurity" -> "CYBERSECURITY";
-            case "finance" -> "FINANCE";
-            case "startups" -> "STARTUPS";
-            case "science" -> "SCIENCE";
-            case "productivity" -> "PRODUCTIVITY";
-            case "gaming" -> "GAMING";
             default -> "AI";
         };
     }

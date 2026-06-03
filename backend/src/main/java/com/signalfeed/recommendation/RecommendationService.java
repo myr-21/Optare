@@ -114,8 +114,8 @@ public class RecommendationService {
             double interestScore = 0;
             if (weight != null) {
                 interestScore = switch (weight) {
-                    case HIGH -> 40.0;
-                    case MEDIUM -> 25.0;
+                    case HIGH -> 100.0;
+                    case MEDIUM -> 20.0;
                     case LOW -> 10.0;
                     default -> 0.0;
                 };

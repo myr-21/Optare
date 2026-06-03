@@ -54,9 +54,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SignalFeed — Break Free From Algorithmic Silos" },
-      { name: "description", content: "Personalized recommendations from YouTube, Reddit, news, and articles — unified in one intelligent feed." },
-      { property: "og:title", content: "SignalFeed" },
+      { title: "Optare — Minimalist Content Discovery Feed" },
+      { name: "description", content: "Personalized content discovery platform. Aggregate your feeds from Hacker News, Dev.to, YouTube, and RSS feeds in one minimalist reader." },
+      { property: "og:title", content: "Optare" },
       { property: "og:description", content: "Cross-platform recommendation aggregator." },
       { property: "og:type", content: "website" },
     ],
