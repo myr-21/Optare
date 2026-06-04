@@ -135,19 +135,21 @@ function Saved() {
               />
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
-                    <button
-                      key={c}
-                      onClick={() => setSelectedCollection(c)}
-                      className="text-left w-full bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition group cursor-pointer"
-                    >
-                      <div className="h-28 relative bg-gradient-to-br from-muted to-accent border-b border-border/45">
-                        <Folder className="absolute right-4 bottom-4 w-8 h-8 text-muted-foreground/60 group-hover:text-primary transition-colors duration-200" />
-                      </div>
-                      <div className="p-4">
-                        <div className="font-display font-semibold text-sidebar-foreground">{c}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">Click to open collection</div>
-                      </div>
-                    </button>
+                {collectionsList.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setSelectedCollection(c)}
+                    className="text-left w-full bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition group cursor-pointer"
+                  >
+                    <div className="h-28 relative bg-gradient-to-br from-muted to-accent border-b border-border/45">
+                      <Folder className="absolute right-4 bottom-4 w-8 h-8 text-muted-foreground/60 group-hover:text-primary transition-colors duration-200" />
+                    </div>
+                    <div className="p-4">
+                      <div className="font-display font-semibold text-sidebar-foreground">{c}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Click to open collection</div>
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
           </div>
