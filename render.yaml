@@ -2,8 +2,9 @@ services:
   - type: web
     name: signalfeed-backend
     env: java
+    rootDir: backend
     buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/backend-0.0.1-SNAPSHOT.jar
+    startCommand: java -jar target/*.jar
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -17,5 +18,3 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
-      - key: PORT
-        generateValue: false
