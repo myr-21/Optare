@@ -18,4 +18,4 @@ UPDATE content_items SET search_vector =
   setweight(to_tsvector('english', coalesce(category, '')), 'B') ||
   setweight(to_tsvector('english', coalesce(array_to_string(tags, ' '), '')), 'B') ||
   setweight(to_tsvector('english', coalesce(description, '')), 'C') ||
-  setweight(to_tsvector('english', coalesce(author, '')), 'D';
+  setweight(to_tsvector('english', coalesce(author, '')), 'D');

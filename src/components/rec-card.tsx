@@ -102,6 +102,14 @@ export function RecCard({ rec }: { rec: any }) {
     }
   };
 
+  const handleRecordView = async () => {
+    try {
+      await recordInteraction(rec.id, "VIEW");
+    } catch (err) {
+      console.error("Failed to record VIEW interaction", err);
+    }
+  };
+
   return (
     <article 
       className={cn(
@@ -111,8 +119,12 @@ export function RecCard({ rec }: { rec: any }) {
     >
       {/* Thumbnail */}
       {hasThumbnail && (
-        <div
-          className="relative aspect-[16/9] overflow-hidden border-b border-border/40"
+        <a
+          href={rec.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleRecordView}
+          className="relative aspect-[16/9] overflow-hidden border-b border-border/40 block cursor-pointer"
           style={backgroundStyle}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
@@ -135,7 +147,7 @@ export function RecCard({ rec }: { rec: any }) {
             <TrendingUp className="w-3 h-3 text-primary" />
             {displayScore}
           </div>
-        </div>
+        </a>
       )}
 
       {/* Body */}
@@ -163,10 +175,18 @@ export function RecCard({ rec }: { rec: any }) {
           <span>·</span>
           <span>{displayTimeAgo}</span>
         </div>
-        <h3 
-          className="font-display font-semibold text-[15px] leading-snug text-foreground line-clamp-2 mb-1.5"
-          dangerouslySetInnerHTML={{ __html: displayTitle }}
-        />
+        <a
+          href={rec.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleRecordView}
+          className="hover:underline cursor-pointer"
+        >
+          <h3 
+            className="font-display font-semibold text-[15px] leading-snug text-foreground line-clamp-2 mb-1.5"
+            dangerouslySetInnerHTML={{ __html: displayTitle }}
+          />
+        </a>
         <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{rec.description}</p>
 
         <div className="flex flex-wrap gap-1 mb-3">
@@ -231,7 +251,8 @@ export function RecCard({ rec }: { rec: any }) {
             href={rec.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground hover:text-primary transition"
+            onClick={handleRecordView}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground hover:text-primary transition cursor-pointer"
           >
             Open <ExternalLink className="w-3 h-3" />
           </a>

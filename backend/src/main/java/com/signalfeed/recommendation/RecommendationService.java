@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
+
+    private static final Logger log = LoggerFactory.getLogger(RecommendationService.class);
 
     private final ContentItemRepository contentItemRepository;
     private final UserInterestRepository userInterestRepository;
@@ -40,10 +44,15 @@ public class RecommendationService {
                         (existing, replacement) -> replacement
                 ));
 
-        // 2. Fetch excluded content items (VIEW or DISMISS)
-        List<InteractionType> excludedTypes = List.of(InteractionType.VIEW, InteractionType.DISMISS);
-        List<UUID> excludedIds = userInteractionRepository.findContentIdsByUserIdAndInteractions(userId, excludedTypes);
-        Set<UUID> excludedSet = new HashSet<>(excludedIds);
+        // Fetch VIEW and DISMISS ids separately for logging/recovery
+        List<UUID> viewedIds = userInteractionRepository.findContentIdsByUserIdAndInteractions(userId, List.of(InteractionType.VIEW));
+        List<UUID> dismissedIds = userInteractionRepository.findContentIdsByUserIdAndInteractions(userId, List.of(InteractionType.DISMISS));
+        
+        Set<UUID> viewedSet = new HashSet<>(viewedIds);
+        Set<UUID> dismissedSet = new HashSet<>(dismissedIds);
+
+        // Recovery: temporarily ignore VIEW interactions in exclusions, keep DISMISS exclusion behavior.
+        Set<UUID> excludedSet = new HashSet<>(dismissedIds);
 
         // 3. Fetch user's saved categories (BOOKMARK, FAVORITE, WATCH_LATER, READ_LATER)
         List<InteractionType> savedTypes = List.of(
@@ -92,6 +101,10 @@ public class RecommendationService {
         } else {
             items = contentItemRepository.findAll();
         }
+
+        long totalContentCount = items.size();
+        long excludedViewCount = items.stream().filter(item -> viewedSet.contains(item.getId())).count();
+        long excludedDismissCount = items.stream().filter(item -> dismissedSet.contains(item.getId())).count();
 
         List<ContentItemDto> scoredItems = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
@@ -219,6 +232,10 @@ public class RecommendationService {
         if (start < scoredItems.size()) {
             pageList = scoredItems.subList(start, end);
         }
+
+        int candidateCount = scoredItems.size();
+        log.info("Feed Recommendation Stats: totalContentCount={}, viewedCount={}, dismissedCount={}, candidateCount={}, finalRecommendationCount={}", 
+                totalContentCount, excludedViewCount, excludedDismissCount, candidateCount, pageList.size());
 
         return new PageImpl<>(pageList, pageable, scoredItems.size());
     }

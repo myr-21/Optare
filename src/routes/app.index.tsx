@@ -2,13 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { RecCard, RecCardSkeleton } from "@/components/rec-card";
 import { SectionHeader, FilterBar, StatCard, EmptyState } from "@/components/ui-bits";
-import { Sparkles, TrendingUp, Bookmark, Activity, ArrowRight, Play, BookOpen, Check, Sliders, RefreshCw, AlertCircle, Layers, Folder } from "lucide-react";
+import { Sparkles, TrendingUp, Bookmark, Activity, ArrowRight, Play, BookOpen, Sliders, RefreshCw, AlertCircle, Layers, Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
   getFeed, 
-  getInterestCategories, 
-  getUserInterests, 
-  updateUserInterests, 
   getStoredUser, 
   getBookmarkCollections, 
   getBookmarks,
@@ -34,10 +31,7 @@ function Home() {
   // Filter state
   const [activeSource, setActiveSource] = useState("All");
 
-  // Interests state
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-  const [userInterests, setUserInterests] = useState<any[]>([]);
-  const [loadingInterests, setLoadingInterests] = useState(true);
+
 
   // Continue section state
   const [continueItems, setContinueItems] = useState<any[]>([]);
@@ -55,21 +49,16 @@ function Home() {
 
   const loadInitialData = async () => {
     setLoading(true);
-    setLoadingInterests(true);
     setError(null);
     try {
-      // Load categories, user interests, collections, and continue items in parallel
-      const [categories, interests, cols, watchLater, readLater, stats] = await Promise.all([
-        getInterestCategories().catch(() => []),
-        getUserInterests().catch(() => []),
+      // Load collections, and continue items in parallel
+      const [cols, watchLater, readLater, stats] = await Promise.all([
         getBookmarkCollections().catch(() => []),
         getBookmarks("WATCH_LATER", "", 0, 3).catch(() => ({ content: [] })),
         getBookmarks("READ_LATER", "", 0, 3).catch(() => ({ content: [] })),
         fetchStats().catch(() => null)
       ]);
 
-      setAvailableCategories(categories);
-      setUserInterests(interests);
       setCollections(cols);
       setAnalytics(stats);
 
@@ -91,7 +80,6 @@ function Home() {
       setError(err.message || "Failed to load feed. Please try again.");
     } finally {
       setLoading(false);
-      setLoadingInterests(false);
     }
   };
 
@@ -177,41 +165,7 @@ function Home() {
     }
   };
 
-  const isCategoryOn = (cat: string) => {
-    const interest = userInterests.find(i => i.category.toUpperCase() === cat.toUpperCase());
-    return interest ? interest.weight !== "IGNORE" : true; // Default to on
-  };
 
-  const handleToggleCategory = async (cat: string) => {
-    try {
-      const isOn = isCategoryOn(cat);
-      const newWeight = isOn ? "IGNORE" : "HIGH";
-
-      // Build the complete updated list
-      const updatedInterests = availableCategories.map(c => {
-        const existing = userInterests.find(i => i.category.toUpperCase() === c.toUpperCase());
-        if (c.toUpperCase() === cat.toUpperCase()) {
-          return { category: c, weight: newWeight };
-        }
-        return { 
-          category: c, 
-          weight: existing ? existing.weight : "MEDIUM" 
-        };
-      });
-
-      // Update backend
-      await updateUserInterests(updatedInterests);
-      
-      // Update local states
-      const refreshedInterests = await getUserInterests();
-      setUserInterests(refreshedInterests);
-      
-      // Refresh feed
-      await fetchFeedData(activeSource);
-    } catch (err) {
-      console.error("Failed to toggle interest category:", err);
-    }
-  };
 
   const handleSourceChange = (source: string) => {
     setActiveSource(source);
@@ -223,64 +177,7 @@ function Home() {
   return (
     <div className="space-y-10 max-w-[1600px]">
 
-      {/* Personalization picker — FIRST */}
-      <section className="bg-card border border-border rounded-2xl p-6 lg:p-8 relative overflow-hidden">
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-1">
-            <Sliders className="w-4 h-4 text-primary" />
-            <span className="text-xs uppercase tracking-widest font-medium text-primary">Personalize your feed</span>
-          </div>
-          <h2 className="font-display text-2xl font-semibold tracking-tight">Choose the signals you want to hear today</h2>
-          <p className="text-sm text-muted-foreground mt-1">Toggle topics on or off — your feed updates instantly.</p>
 
-          <div className="flex flex-wrap gap-2 mt-6">
-            {loadingInterests ? (
-              <div className="flex gap-2 flex-wrap">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="h-8 w-24 bg-muted animate-pulse rounded-full" />
-                ))}
-              </div>
-            ) : (
-              availableCategories.map((c) => {
-                const on = isCategoryOn(c);
-                return (
-                  <button
-                    key={c}
-                    onClick={() => handleToggleCategory(c)}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm transition",
-                      on
-                        ? "bg-primary/15 border-primary/40 text-foreground"
-                        : "bg-surface border-border text-muted-foreground hover:text-foreground hover:border-border/80"
-                    )}
-                  >
-                    {on && <Check className="w-3.5 h-3.5 text-primary" />}
-                    {c}
-                  </button>
-                );
-              })
-            )}
-          </div>
-
-          <div className="flex items-center justify-between mt-6 pt-5 border-t border-border">
-            <div className="text-xs text-muted-foreground">
-              {loadingInterests ? "Syncing interests..." : (
-                <>
-                  <span className="text-foreground font-medium">
-                    {userInterests.filter(i => i.weight !== "IGNORE").length}
-                  </span> topics active · feed loaded dynamically
-                </>
-              )}
-            </div>
-            <Link
-              to="/app/settings"
-              className="text-xs text-primary hover:underline inline-flex items-center gap-1"
-            >
-              Advanced personalization <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Continue */}
       {continueItems.length > 0 && (
@@ -453,8 +350,8 @@ function Home() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Viewed" value={String(analytics?.totalViewed ?? 0)} delta="" icon={<Activity className="w-4 h-4" />} />
           <StatCard label="Saved items" value={String(analytics?.totalSaved ?? 0)} delta="" icon={<Bookmark className="w-4 h-4" />} />
-          <StatCard label="Categories tracked" value={String(availableCategories.length)} delta="" icon={<Sliders className="w-4 h-4" />} />
-          <StatCard label="Active Sources" value={String(availableCategories.length > 0 ? 4 : 0)} delta="" icon={<TrendingUp className="w-4 h-4" />} />
+          <StatCard label="Categories tracked" value="9" delta="" icon={<Sliders className="w-4 h-4" />} />
+          <StatCard label="Active Sources" value="4" delta="" icon={<TrendingUp className="w-4 h-4" />} />
         </div>
       </section>
     </div>

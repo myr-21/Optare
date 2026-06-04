@@ -41,9 +41,6 @@ public class FeedController {
         Pageable pageable = PageRequest.of(page, size);
         Page<ContentItemDto> feed = recommendationService.getPersonalizedFeed(userId, category, source, pageable);
 
-        // Record VIEW interaction automatically for all items fetched in the feed
-        feed.getContent().forEach(item -> interactionService.recordViewInteraction(userId, item.getId()));
-
         return ResponseEntity.ok(feed);
     }
 }
