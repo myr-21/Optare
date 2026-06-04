@@ -42,9 +42,7 @@ function Landing() {
       <section className="relative overflow-hidden flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
         <div className="absolute inset-0 grid-bg opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]" />
         <div className="relative max-w-7xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-border text-xs text-muted-foreground font-medium mb-6 animate-fade-in">
-            <Zap className="w-3 h-3 text-primary" /> Aggregating developer sources in real time
-          </div>
+
           <h1 className="font-display text-5xl md:text-7xl font-semibold tracking-tighter leading-[1.05] text-gradient max-w-4xl mx-auto animate-slide-up">
             All your feeds.<br />One minimalist reader.
           </h1>
