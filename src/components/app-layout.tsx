@@ -52,9 +52,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col relative",
+          "fixed lg:sticky top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col lg:relative",
           collapsed ? "w-[72px]" : "w-[248px]",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          !mobileOpen && "hidden lg:flex"
         )}
       >
         <button
