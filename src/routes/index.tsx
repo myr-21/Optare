@@ -31,7 +31,7 @@ function Landing() {
 
           <div className="flex items-center gap-2">
             <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground px-3 py-1.5 transition">Log in</Link>
-            <Link to="/signup" className="text-sm font-medium bg-primary text-primary-foreground rounded-lg px-4 py-2 hover:opacity-90 transition">
+            <Link to="/app" className="text-sm font-medium bg-primary text-primary-foreground rounded-lg px-4 py-2 hover:opacity-90 transition">
               Get started
             </Link>
           </div>
@@ -50,7 +50,7 @@ function Landing() {
             Aggregate, search, and filter your favorite content from Hacker News, Dev.to, YouTube, and RSS feeds in a single high-density, ad-free reader.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center animate-slide-up" style={{ animationDelay: "200ms" }}>
-            <Link to="/signup" className="group inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg px-6 py-3 font-medium hover:opacity-90 transition shadow-sm">
+            <Link to="/app" className="group inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg px-6 py-3 font-medium hover:opacity-90 transition shadow-sm">
               Get started <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
             </Link>
             <Link to="/login" className="inline-flex items-center justify-center gap-2 bg-surface border border-border rounded-lg px-6 py-3 font-medium hover:bg-accent transition">

@@ -2,7 +2,7 @@ import { Bookmark, ThumbsUp, ThumbsDown, ExternalLink, Target, TrendingUp, Play,
 import { useState } from "react";
 import { type Recommendation, sourceMeta, type SourceType } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import { recordInteraction, removeInteraction } from "@/lib/api";
+import { recordInteraction, removeInteraction, getStoredToken } from "@/lib/api";
 
 function formatTimeAgo(dateStr?: string | Date) {
   if (!dateStr) return "recent";
@@ -55,6 +55,10 @@ export function RecCard({ rec }: { rec: any }) {
     : undefined;
 
   const handleThumbsUp = async () => {
+    if (!getStoredToken()) {
+      window.dispatchEvent(new CustomEvent("trigger-auth-gate"));
+      return;
+    }
     try {
       if (feedback === "up") {
         setFeedback(null);
@@ -72,6 +76,10 @@ export function RecCard({ rec }: { rec: any }) {
   };
 
   const handleThumbsDown = async () => {
+    if (!getStoredToken()) {
+      window.dispatchEvent(new CustomEvent("trigger-auth-gate"));
+      return;
+    }
     try {
       if (feedback === "down") {
         setFeedback(null);
@@ -89,6 +97,10 @@ export function RecCard({ rec }: { rec: any }) {
   };
 
   const handleBookmark = async () => {
+    if (!getStoredToken()) {
+      window.dispatchEvent(new CustomEvent("trigger-auth-gate"));
+      return;
+    }
     try {
       if (saved) {
         setSaved(false);
@@ -103,6 +115,7 @@ export function RecCard({ rec }: { rec: any }) {
   };
 
   const handleRecordView = async () => {
+    if (!getStoredToken()) return;
     try {
       await recordInteraction(rec.id, "VIEW");
     } catch (err) {

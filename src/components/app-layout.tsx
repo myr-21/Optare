@@ -1,10 +1,10 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  Home, Compass, Bookmark, Settings, Search, ChevronLeft, Menu, LogOut
+  Home, Compass, Bookmark, Settings, Search, ChevronLeft, Menu, LogOut, LogIn, UserPlus
 } from "lucide-react";
 import { useState, useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { logout, getStoredUser } from "@/lib/api";
+import { logout, getStoredUser, getStoredToken } from "@/lib/api";
 import { Logo } from "@/components/logo";
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const navItems = [
   { to: "/app", label: "Home", icon: Home, exact: true },
@@ -32,6 +33,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const searchParams = useRouterState({ select: (s) => s.location.search });
   const q = (searchParams as any).q || "";
   const user = getStoredUser();
+  const token = getStoredToken();
+  const [showAuthGate, setShowAuthGate] = useState(false);
+
+  useEffect(() => {
+    const handleAuthGate = () => {
+      setShowAuthGate(true);
+    };
+    window.addEventListener("trigger-auth-gate", handleAuthGate);
+    return () => {
+      window.removeEventListener("trigger-auth-gate", handleAuthGate);
+    };
+  }, []);
 
   useEffect(() => {
     setSearchVal(q);
@@ -52,7 +65,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col lg:relative",
+          "fixed lg:sticky top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col",
           collapsed ? "w-[72px]" : "w-[248px]",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           !mobileOpen && "hidden lg:flex"
@@ -107,44 +120,88 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="p-3 border-t border-sidebar-border mt-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className={cn(
-                "flex items-center gap-3 w-full p-2 rounded-lg hover:bg-sidebar-accent transition-all text-left outline-none cursor-pointer",
+          {token ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={cn(
+                  "flex items-center gap-3 w-full p-2 rounded-lg hover:bg-sidebar-accent transition-all text-left outline-none cursor-pointer",
+                  collapsed ? "justify-center" : ""
+                )}>
+                  <Avatar className="w-8 h-8 border border-border shrink-0">
+                    <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
+                      {user?.username ? user.username[0].toUpperCase() : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  {!collapsed && (
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-sidebar-foreground truncate leading-none mb-1">{user?.username || "Account"}</p>
+                      <p className="text-[10px] text-muted-foreground truncate leading-none">{user?.email}</p>
+                    </div>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align={collapsed ? "center" : "start"} side="right" className="w-56 bg-popover border border-border rounded-lg shadow-lg p-1 text-popover-foreground z-50">
+                <DropdownMenuLabel className="font-normal px-2 py-1.5">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none text-foreground">{user?.username || "Account"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-muted" />
+                <DropdownMenuItem onClick={() => navigate({ to: "/app/settings" })} className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-accent outline-none">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  <span>Account Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-muted" />
+                <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive outline-none">
+                  <LogOut className="h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className={cn(
+                "flex items-center gap-3 w-full p-2 rounded-lg bg-primary/5 border border-primary/10 text-left",
                 collapsed ? "justify-center" : ""
               )}>
                 <Avatar className="w-8 h-8 border border-border shrink-0">
-                  <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
-                    {user?.username ? user.username[0].toUpperCase() : "U"}
+                  <AvatarFallback className="text-xs bg-muted text-muted-foreground font-semibold">
+                    G
                   </AvatarFallback>
                 </Avatar>
                 {!collapsed && (
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-sidebar-foreground truncate leading-none mb-1">{user?.username || "Account"}</p>
-                    <p className="text-[10px] text-muted-foreground truncate leading-none">{user?.email || "user@optare.com"}</p>
+                    <p className="text-xs font-semibold text-primary truncate leading-none">Guest Mode</p>
                   </div>
                 )}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align={collapsed ? "center" : "start"} side="right" className="w-56 bg-popover border border-border rounded-lg shadow-lg p-1 text-popover-foreground z-50">
-              <DropdownMenuLabel className="font-normal px-2 py-1.5">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none text-foreground">{user?.username || "Account"}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user?.email || "user@optare.com"}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-muted" />
-              <DropdownMenuItem onClick={() => navigate({ to: "/app/settings" })} className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-accent outline-none">
-                <Settings className="h-4 w-4 text-muted-foreground" />
-                <span>Account Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-muted" />
-              <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive outline-none">
-                <LogOut className="h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </div>
+              <div className="flex flex-col gap-1.5 mt-1">
+                <Link
+                  to="/login"
+                  className={cn(
+                    "flex items-center justify-center gap-2 py-1.5 px-3 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition",
+                    collapsed && "w-8 h-8 p-0"
+                  )}
+                  title="Log In"
+                >
+                  <LogIn className="w-3.5 h-3.5 shrink-0" />
+                  {!collapsed && <span>Log In</span>}
+                </Link>
+                <Link
+                  to="/signup"
+                  className={cn(
+                    "flex items-center justify-center gap-2 py-1.5 px-3 text-xs font-medium rounded-lg bg-secondary text-secondary-foreground border border-border hover:bg-accent transition",
+                    collapsed && "w-8 h-8 p-0"
+                  )}
+                  title="Sign Up"
+                >
+                  <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                  {!collapsed && <span>Sign Up</span>}
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -176,11 +233,52 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </form>
 
           {/* Balance spacing on mobile to center search */}
-          <div className="w-9 h-9 lg:hidden" />
+          {!token ? (
+            <div className="hidden md:flex items-center gap-2 shrink-0">
+              <Link to="/login" className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 transition">Log In</Link>
+              <Link to="/signup" className="text-xs font-medium bg-primary text-primary-foreground rounded-lg px-3 py-1.5 hover:opacity-90 transition">
+                Sign Up
+              </Link>
+            </div>
+          ) : (
+            <div className="w-9 h-9 lg:hidden" />
+          )}
         </header>
 
         <main className="flex-1 p-4 lg:p-8 animate-fade-in">{children}</main>
       </div>
+
+      <Dialog open={showAuthGate} onOpenChange={setShowAuthGate}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader className="flex flex-col items-center text-center space-y-2">
+            <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-2">
+              <Logo className="w-6 h-6" />
+            </div>
+            <DialogTitle className="text-xl font-semibold">Join Optare</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Create an account to save and personalize your experience.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 mt-4">
+            <Link
+              to="/signup"
+              onClick={() => setShowAuthGate(false)}
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition shadow-sm text-sm"
+            >
+              <UserPlus className="w-4 h-4" />
+              Sign Up
+            </Link>
+            <Link
+              to="/login"
+              onClick={() => setShowAuthGate(false)}
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-secondary text-secondary-foreground border border-border rounded-lg font-medium hover:bg-accent transition text-sm"
+            >
+              <LogIn className="w-4 h-4" />
+              Log In
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
