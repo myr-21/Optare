@@ -2,6 +2,24 @@
 
 Optare follows a modern three-tier architecture consisting of a React-based frontend, a Spring Boot backend, and a PostgreSQL database.
 
+## Interface Preview
+
+### Landing Page
+![Landing Page](./public/preview/landing-page.png)
+
+### Personalized Feed
+![Personalized Feed](./public/preview/personalized-feed.png)
+
+### Discover Topics
+![Discover Topics](./public/preview/discover-topics.png)
+
+### Search & Articles
+![Search Articles](./public/preview/search-articles.png)
+
+### Videos & Discussions Search
+![Videos & Discussions](./public/preview/search-videos-discussions.png)
+
+
 ## Frontend Layer
 
 * React + TanStack Start
