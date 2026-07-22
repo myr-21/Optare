@@ -22,6 +22,7 @@ function Home() {
   const [feedData, setFeedData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showColdStartMessage, setShowColdStartMessage] = useState(false);
 
   // Pagination state
   const [page, setPage] = useState(0);
@@ -50,6 +51,13 @@ function Home() {
   const loadInitialData = async () => {
     setLoading(true);
     setError(null);
+    setShowColdStartMessage(false);
+
+    // Show friendly message if backend takes more than 3 seconds (cold start indicator)
+    const timer = setTimeout(() => {
+      setShowColdStartMessage(true);
+    }, 3000);
+
     try {
       // Load collections, and continue items in parallel
       const [cols, watchLater, readLater, stats] = await Promise.all([
@@ -79,7 +87,9 @@ function Home() {
       console.error("Error loading home data:", err);
       setError(err.message || "Failed to load feed. Please try again.");
     } finally {
+      clearTimeout(timer);
       setLoading(false);
+      setShowColdStartMessage(false);
     }
   };
 
@@ -238,7 +248,21 @@ function Home() {
         />
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           {loading ? (
-            Array.from({ length: 8 }).map((_, i) => <RecCardSkeleton key={i} />)
+            <>
+              {showColdStartMessage && (
+                <div className="col-span-full bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl p-4 flex gap-3 animate-fade-in mb-2">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-sm text-amber-400">Waking up the backend server...</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Our API is hosted on Render's free tier, which sleeps after 15 minutes of inactivity. 
+                      Waking the server up may take 1 to 2 minutes. Thank you for your patience!
+                    </p>
+                  </div>
+                </div>
+              )}
+              {Array.from({ length: 8 }).map((_, i) => <RecCardSkeleton key={i} />)}
+            </>
           ) : error ? (
             <div className="col-span-full py-12 text-center bg-card border border-border rounded-xl">
               <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
